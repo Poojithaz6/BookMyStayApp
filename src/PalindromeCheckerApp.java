@@ -10,10 +10,12 @@ public class PalindromeCheckerApp {
             if (chars[start] != chars[end]) {
                 isPalindrome= false;
                 break;
-                System.out.println("Input:"+input);
-                System.out.println("Is pallindrome? ::"+isPalindrome);
             }
+            start++;
+            end--;
 
         }
+        System.out.println("Input:"+input);
+        System.out.println("Is palindrome? :"+isPalindrome);
     }
 }
