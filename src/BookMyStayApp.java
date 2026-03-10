@@ -15,76 +15,63 @@ abstract class Room {
         this.price = price;
     }
 
-    public String getRoomType() {
-        return roomType;
-    }
+    public String getRoomType() { return roomType; }
+    public int getBeds() { return beds; }
+    public double getSize() { return size; }
+    public double getPrice() { return price; }
 
-    public int getBeds() {
-        return beds;
-    }
-
-    public double getSize() {
-        return size;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void displayRoomDetails() {
-        System.out.println(roomType + " | Beds: " + beds + " | Size: " + size + " sq ft | Price: $" + price);
+    // Display details in line-by-line format
+    public void displayRoomDetailsLineByLine(int availableCount) {
+        System.out.println("Room Type: " + roomType);
+        System.out.println("Beds: " + beds);
+        System.out.println("Size: " + size + " sq ft");
+        System.out.println("Price: $" + price);
+        System.out.println("Available: " + availableCount);
+        System.out.println("------------------------");
     }
 }
 
 // Concrete Room types
 class SingleRoom extends Room {
-    SingleRoom() {
-        super("Single Room", 1, 200, 80);
-    }
+    SingleRoom() { super("Single Room", 1, 200, 80); }
 }
 
 class DoubleRoom extends Room {
-    DoubleRoom() {
-        super("Double Room", 2, 350, 120);
-    }
+    DoubleRoom() { super("Double Room", 2, 350, 120); }
 }
 
 class SuiteRoom extends Room {
-    SuiteRoom() {
-        super("Suite Room", 3, 600, 250);
-    }
+    SuiteRoom() { super("Suite Room", 3, 600, 250); }
 }
 
 // Centralized inventory management
 class RoomInventory {
-
     private Map<String, Integer> inventory;
 
-    RoomInventory() {
-        inventory = new HashMap<>();
-    }
+    RoomInventory() { inventory = new HashMap<>(); }
 
-    // Register a room type with initial availability
     public void addRoomType(Room room, int availableCount) {
         inventory.put(room.getRoomType(), availableCount);
     }
 
-    // Get current availability
     public int getAvailability(String roomType) {
         return inventory.getOrDefault(roomType, 0);
     }
+}
 
-    // Update availability by a delta (positive or negative)
-    public void updateAvailability(String roomType, int delta) {
-        int current = inventory.getOrDefault(roomType, 0);
-        inventory.put(roomType, current + delta);
-    }
+// Search service for guests – read-only access
+class RoomSearchService {
+    private RoomInventory inventory;
 
-    // Display current inventory
-    public void displayInventory() {
-        System.out.println("\nCurrent Room Inventory:");
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue() + " available");
+    RoomSearchService(RoomInventory inventory) { this.inventory = inventory; }
+
+    // Display all rooms, even if availability is 0
+    public void displayAvailableRooms(Room[] rooms) {
+        System.out.println("\nAvailable Rooms:");
+
+        for (Room room : rooms) {
+            int available = inventory.getAvailability(room.getRoomType());
+            room.displayRoomDetailsLineByLine(available);
         }
     }
 }
@@ -92,37 +79,23 @@ class RoomInventory {
 // Main application class
 class HotelBookingApp {
     public static void main(String[] args) {
-
-        System.out.println("Welcome to the Hotel Booking System (Inventory Demo)\n");
+        System.out.println("Welcome to the Hotel Booking System (Guest Search Demo)\n");
 
         // Create room objects
         Room single = new SingleRoom();
         Room doubleR = new DoubleRoom();
         Room suite = new SuiteRoom();
-
-        // Display room details
-        System.out.println("Room Details:");
-        single.displayRoomDetails();
-        doubleR.displayRoomDetails();
-        suite.displayRoomDetails();
+        Room[] rooms = { single, doubleR, suite };
 
         // Initialize centralized inventory
         RoomInventory inventory = new RoomInventory();
         inventory.addRoomType(single, 5);
-        inventory.addRoomType(doubleR, 3);
+        inventory.addRoomType(doubleR, 3); // now double room has availability
         inventory.addRoomType(suite, 2);
 
-        // Display initial inventory
-        inventory.displayInventory();
+        // Guest search
+        RoomSearchService searchService = new RoomSearchService(inventory);
+        searchService.displayAvailableRooms(rooms);
 
-        // Example updates
-        System.out.println("\nBooking 1 Single Room and 1 Suite Room...");
-        inventory.updateAvailability(single.getRoomType(), -1);
-        inventory.updateAvailability(suite.getRoomType(), -1);
-
-        // Display updated inventory
-        inventory.displayInventory();
-
-        System.out.println("\nApplication terminated.");
     }
 }
